@@ -8,18 +8,20 @@ public class Billett {
     private String telefonnr;
     private String epost;
 
-    public Billett(String film, Integer antall, String fornavn, String etternavn, String telefonnr, String epost) {
+    private int id;
+
+    public Billett(String film, Integer antall, String fornavn, String etternavn, String telefonnr, String epost, int id) {
         this.film = film;
         this.antall = antall;
         this.fornavn = fornavn;
         this.etternavn = etternavn;
         this.telefonnr = telefonnr;
         this.epost = epost;
+        this.id = id;
     }
 
     public Billett() {
     }
-
     public String getFilm() {
         return film;
     }
@@ -44,6 +46,8 @@ public class Billett {
         return epost;
     }
 
+    public Integer getId() {return id;}
+
     public void setFilm(String film) {
         this.film = film;
     }
@@ -66,5 +70,9 @@ public class Billett {
 
     public void setEpost(String epost) {
         this.epost = epost;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

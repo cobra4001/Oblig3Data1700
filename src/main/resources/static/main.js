@@ -22,7 +22,7 @@ Form.addEventListener("submit", async (e) => {
             epost : Epost.value
 
         }
-
+// Legge til Update og delete per billett
         try {
             await postrequest(Listen);
         }catch (error){
@@ -32,7 +32,11 @@ Form.addEventListener("submit", async (e) => {
 
     }
     try {
-        await getrequest();
+       let post  = await getrequest();
+
+            await formknapper(post);
+
+
 
     }catch (error){
         console.log("Try get request ", error);
@@ -192,25 +196,82 @@ function getrequest() {
                 if (xhttp.status===200){
                     let post = JSON.parse(xhttp.responseText);
                     console.log("Getrequest fikk data")
-                    resolve(post)
                     let billett = "";
                     for (let i = 0; i < post.length ; i++) {
                         billett += `
                     <tr>
-                        <td>${post[i].film}</td>
-                        <td>${post[i].antall}</td>
-                        <td>${post[i].fornavn}</td>
-                        <td>${post[i].etternavn}</td>
-                        <td>${post[i].telefonnr}</td>
-                        <td>${post[i].epost}</td>
+                        <form id="opp${post[i].id}">
+                           
+                            <td> ${post[i].id}</td>
+                            <td> 
+                                <select>
+                                 `
+
+                        if(post[i].film === 'Grusomme meg 2'){
+                            billett+=`
+                                <option value='Grusomme meg 2' selected>Grusomme meg 2</option>
+                                <option value='Rebel Moon'>Rebel Moon</option>
+                                <option value='Dune'>Dune</option>
+                        
+                            `
+
+                        } else if(post[i].film === 'Rebel Moon'){
+                            billett+=`
+                                 <option value='Grusomme meg 2'>Grusomme meg 2</option>
+                                 <option value='Rebel Moon' selected>Rebel Moon</option>
+                                 <option value='Dune'>Dune</option>
+                            `
+
+                        } else if(post[i].film === 'Dune'){
+                          billett+=`
+                                <option value='Grusomme meg 2'>Grusomme meg 2</option>
+                                <option value='Rebel Moon'>Rebel Moon</option>
+                                <option value='Dune' selected>Dune</option>
+                          
+                          
+                          `
+                        } else{
+                            console.log("Blobfish")
+                        }
+
+                        billett+=`                               
+                                </select>
+                            </td>
+                            <td> <input type="number" min="1" value = "${post[i].antall}"/></td>
+                            <td> <input type ="text" value = "${post[i].fornavn}"/></td>
+                            <td> <input type ="text" value = "${post[i].etternavn}"/></td>
+                            <td> <input type ="tel" maxlength="11" value = "${post[i].telefonnr}"/></td>
+                            <td> <input type ="email" value = "${post[i].epost}"/></td>
+                            
+                            <button type="submit" value="oppdater" >
+                            
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                                  <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                                  <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                                </svg>
+                            
+                            </button>
+                        
+                            <button type="submit" value="slett" >
+                              
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                     <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                  </svg>
+                            </button>
+                       
+                        </form>    
+                        
                     </tr>
                     `
                     }
                     if(post && post.length > 0){
                         console.log("Post returned data", post)
                         table.innerHTML = billett;
+
+                        resolve(post)
                     } else{
                         console.log("Post returned null", post);
+                        reject(post)
                     }
 
 
@@ -226,10 +287,71 @@ function getrequest() {
 
 }
 
+function oppdatereBillett() {
+
+    return new Promise(function(resolve, reject) {
+        let xhttp = new XMLHttpRequest();
+        xhttp.open("PUT", "/oppdatereBillett", true);
+        xhttp.onreadystatechange = function() {
+            if( xhttp.readyState===4 ){
+                if (xhttp.status===200){
+                let post = JSON.parse(xhttp.responseText);
+                document.getElementById("billett-table-body").innerHTML = "";
+                    let billett = "";
+                   console.log("Test oppdater billett")
+                    if(post && post.length > 0){
+                        console.log("Post returned data", post)
+                        table.innerHTML = billett;
+                        resolve(post)
+                    } else{
+                        console.log("Post returned null", post);
+                        reject(post)
+                    }
+
+
+                } else{
+                    console.error("Data ikke lagret ", xhttp.status)
+                    reject(xhttp.status)
+                }
+
+
+            }
+
+
+
+        }
+        xhttp.send();
+
+
+    })
+
+}
+function slettenBillett(){
+    return new Promise(function(resolve, reject) {
+        let xhttp = new XMLHttpRequest();
+        xhttp.open("DELETE", "/clearBillett", true);
+        xhttp.onreadystatechange = function() {
+            if( xhttp.readyState===4 ){
+                if (xhttp.status===200){
+                    console.log("Data slettet");
+                    resolve()
+                } else{
+                    console.error("Data ikke slettet ");
+                    reject(xhttp.status)
+                }
+            }
+
+        }
+        xhttp.send()
+    })
+}
+
+
+
 function getclear() {
     return new Promise(function(resolve, reject) {
         let xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "/clearData", true);
+        xhttp.open("DELETE", "/clearData", true);
         xhttp.onreadystatechange = function() {
             if( xhttp.readyState===4 ){
                 if (xhttp.status===200){
@@ -245,5 +367,52 @@ function getclear() {
         }
         xhttp.send()
     })
+}
+
+async function formknapper(post){
+
+    for (let i = 0; i < post.length ; i++) {
+        try{
+            document.getElementById("opp"+post[i].id).addEventListener("submit", function(event){
+            console.log("AaaSDSAD")
+
+            });
+
+            document.getElementById("opp"+post[i].id).addEventListener("submit", function(event){
+                event.preventDefault();
+                console.log("Error prevent")
+
+            });
+
+
+
+        } catch(e){
+        console.log("FEIL", e)
+
+        }
+        /*
+        document.getElementById("opp"+post[i].id).addEventListener("submit", function(event){
+            console.log("DSADSADSA")
+            event.preventDefault();
+            console.log("AAAA")
+            const data = new FormData(this);
+            const action = event.submitter.value;
+            if(action === "oppdater"){
+                console.log("Oppdater")
+
+
+            } else if(action === "slett"){
+
+                console.log("Slett")
+
+            } else{
+                console.log("Eror kunne ikke finne action")
+
+            }
+
+        })
+*/
+    }
+
 
 }
